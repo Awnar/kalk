@@ -5,14 +5,12 @@ import android.os.Bundle;
 import android.widget.*;
 import android.view.View;
 import java.lang.String;
+import android.webkit.*;
 
 public class MainActivity extends AppCompatActivity {
 
     private TextView show,show2;
-    private double wynik=0,last;
     private String input="";
-    private int dot=0;
-    private char operation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,171 +20,46 @@ public class MainActivity extends AppCompatActivity {
         show2 = findViewById(R.id.textView1);
     }
 
-//    private void number(double nr){
-//        try {
-//            if (wynik == 0 || operation == ' ')
-//                wynik=nr;
-//            else{
-//                double tmp = wynik;
-//                if(dot>0){
-//                    tmp+=nr/(10^dot++);
-//                }else{
-//                    tmp*=10;
-//                    tmp+=nr;
-//                }
-//                wynik=tmp;
-//            }
-//            refresh();
-//        }catch (Exception e){}
-//    }
-
-    private void number(int nr){
-        try {
-            if (nr > 0)
-                input += Integer.toString(nr);
-            else if (dot == 0) {
-                if (input.compareTo("") == 0)
-                    input = "0.";
-                else
-                    input += '.';
-                dot = 1;
-            }
-            wynik = Double.parseDouble(input);
-        }catch (Exception e){
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-        }finally {
-            refresh();
-        }
+    private void clear() {
+        input = "";
+        show.setText("0");
+        show2.setText("");
     }
 
-    private void refresh(){
-        if(last>0) show2.setText(Double.toString(last)+"  "+operation);
-        else show2.setText("");
-        show.setText(Double.toString(wynik));
+    private void calculate() {
+        WebView webview = new WebView(getApplicationContext());
+        webview.getSettings().setJavaScriptEnabled(true);
+        webview.evaluateJavascript("(function() { return "+input+"; })();", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String result) {
+                if(result.compareTo("null")==0) result=getString(R.string.error);
+                refresh(result);
+            }
+        });
     }
 
-    private void setOperation(char op){
-        calc(false);
-        last = wynik;
-        wynik = 0;
-        operation = op;
-        refresh();
-    }
-
-    private void calc(Boolean f){
-        try {
-            input="";
-            dot=0;
-            switch (operation) {
-                case '+': {
-                    wynik += last;
-                    break;
-                }
-                case '-': {
-                    wynik = last - wynik;
-                    break;
-                }
-                case '*': {
-                    wynik *= last;
-                    break;
-                }
-                case '/': {
-                    if(wynik==0){
-                        wynik=0;
-                        last=0;
-                        operation=' ';
-                        dot=0;
-                        refresh();
-                        show.setText("Nie można dzielić przez 0");
-                    }
-                    wynik = last / wynik;
-                    break;
-                }
-            }
-            if(f) {
-                operation = ' ';
-                last=0;
-                refresh();
-            }
-        }catch (Exception e){
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+    private void refresh(String result){
+        show2.setText(input);
+        show.setText(result);
+        input="";
     }
 
     public void onClick(View v){
         int id = v.getId();
         switch (id) {
-            case R.id.button0: {
-                number(0);
+            case R.id.button15: { //=
+                calculate();
                 break;
             }
-            case R.id.button1: {
-                number(1);
+            case R.id.button16: { //C
+                clear();
                 break;
             }
-            case R.id.button2: {
-                number(2);
-                break;
-            }
-            case R.id.button3: {
-                number(3);
-                break;
-            }
-            case R.id.button4: {
-                number(4);
-                break;
-            }
-            case R.id.button5: {
-                number(5);
-                break;
-            }
-            case R.id.button6: {
-                number(6);
-                break;
-            }
-            case R.id.button7: {
-                number(7);
-                break;
-            }
-            case R.id.button8: {
-                number(8);
-                break;
-            }
-            case R.id.button9: {
-                number(9);
-                break;
-            }
-            case R.id.button10: {
-                //if(dot==0)dot=1;
-                number(-1);
-                break;
-            }
-            case R.id.button11: {
-                setOperation('/');
-                break;
-            }
-            case R.id.button12: {
-                setOperation('*');
-                break;
-            }
-            case R.id.button13: {
-                setOperation('-');
-                break;
-            }
-            case R.id.button14: {//+
-                setOperation('+');
-                break;
-            }
-            case R.id.button15: {
-                calc(true);
-                break;
-            }
-            case R.id.button16: {
-                wynik=0;
-                last=0;
-                operation=' ';
-                dot=0;
-                refresh();
+            default:{
+                if(input=="" && show2.getText().toString().compareTo("")!=0)
+                    show2.setText(show.getText());
+                input += ((Button)v).getText().toString();
+                show.setText(input);
                 break;
             }
         }
