@@ -31,7 +31,7 @@
             android:id="@+id/textView0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="0.0"
+            android:text="0"
             android:textSize="30sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -61,6 +61,20 @@
                 android:layout_height="wrap_content"
                 android:onClick="onClick"
                 android:text="C" />
+
+            <Button
+                android:id="@+id/button17"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="(" />
+
+            <Button
+                android:id="@+id/button18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text=")" />
 
         </TableRow>
 
@@ -94,7 +108,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onClick"
-                android:text="\\" />
+                android:text="/" />
         </TableRow>
 
         <TableRow
