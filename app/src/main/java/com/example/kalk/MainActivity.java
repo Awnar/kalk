@@ -9,7 +9,7 @@ import java.lang.String;
 public class MainActivity extends AppCompatActivity {
 
     private TextView show,show2;
-    private double wynik,last;
+    private double wynik=0,last;
     private String input="";
     private int dot=0;
     private char operation;
@@ -18,42 +18,45 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        wynik = 0;
         show = findViewById(R.id.textView0);
         show2 = findViewById(R.id.textView1);
     }
 
-    private void number0(double nr){
-        try {
-            if (wynik == 0 || operation == ' ')
-                wynik=nr;
-            else{
-                double tmp = wynik;
-                if(dot>0){
-                    tmp+=nr/(10^dot++);
-                }else{
-                    tmp*=10;
-                    tmp+=nr;
-                }
-                wynik=tmp;
-            }
-            refresh();
-        }catch (Exception e){}
-    }
+//    private void number(double nr){
+//        try {
+//            if (wynik == 0 || operation == ' ')
+//                wynik=nr;
+//            else{
+//                double tmp = wynik;
+//                if(dot>0){
+//                    tmp+=nr/(10^dot++);
+//                }else{
+//                    tmp*=10;
+//                    tmp+=nr;
+//                }
+//                wynik=tmp;
+//            }
+//            refresh();
+//        }catch (Exception e){}
+//    }
 
     private void number(int nr){
-        if(nr>0)
-            input += Integer.toString(nr);
-        else if(dot==0) {
-            if(input.compareTo("")==0)
-                input ="0.";
-            else
-                input += '.';
-            dot = 1;
+        try {
+            if (nr > 0)
+                input += Integer.toString(nr);
+            else if (dot == 0) {
+                if (input.compareTo("") == 0)
+                    input = "0.";
+                else
+                    input += '.';
+                dot = 1;
+            }
+            wynik = Double.parseDouble(input);
+        }catch (Exception e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+        }finally {
+            refresh();
         }
-        //show.setText(input);
-        wynik = Double.parseDouble(input);
-        refresh();
     }
 
     private void refresh(){
@@ -71,30 +74,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void calc(Boolean f){
-        input="";
-        dot=0;
-        switch (operation) {
-            case '+': {
-                wynik += last;
-                break;
+        try {
+            input="";
+            dot=0;
+            switch (operation) {
+                case '+': {
+                    wynik += last;
+                    break;
+                }
+                case '-': {
+                    wynik = last - wynik;
+                    break;
+                }
+                case '*': {
+                    wynik *= last;
+                    break;
+                }
+                case '/': {
+                    wynik = last / wynik;
+                    break;
+                }
             }
-            case '-': {
-                wynik = last - wynik;
-                break;
+            if(f) {
+                operation = ' ';
+                last=0;
+                refresh();
             }
-            case '*': {
-                wynik *= last;
-                break;
-            }
-            case '/': {
-                wynik = last / wynik;
-                break;
-            }
-        }
-        if(f) {
-            operation = ' ';
-            last=0;
-            refresh();
+        }catch (Exception e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
