@@ -91,6 +91,14 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
                 case '/': {
+                    if(wynik==0){
+                        wynik=0;
+                        last=0;
+                        operation=' ';
+                        dot=0;
+                        refresh();
+                        show.setText("Nie można dzielić przez 0");
+                    }
                     wynik = last / wynik;
                     break;
                 }
