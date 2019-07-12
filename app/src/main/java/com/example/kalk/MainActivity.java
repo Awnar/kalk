@@ -31,9 +31,12 @@ public class MainActivity extends AppCompatActivity {
         tmp = tmp.replaceAll("E","Math.E");
         tmp = tmp.replaceAll("LOG","Math.log");
 
+        if(tmp.charAt(0)>57 || tmp.charAt(0)<48)//if first char is between 0 ans 9 (ASCII code)
+            tmp = show2.getText()+tmp;
+
         WebView webview = new WebView(getApplicationContext());
         webview.getSettings().setJavaScriptEnabled(true);
-        webview.evaluateJavascript("(function() { return "+tmp+"; })();", new ValueCallback<String>() {
+        webview.evaluateJavascript("(function() { return "+tmp+"; })();",new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String result) {
                 if(result.compareTo("null")==0) result=getString(R.string.error);
