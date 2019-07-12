@@ -23,18 +23,16 @@ public class MainActivity extends AppCompatActivity {
     private void clear() {
         input = "";
         show.setText("0");
+        show2.setText("");
     }
 
     private void calculate() {
-        class JsObject {
-            @JavascriptInterface
-            public String toString() { return "injectedObject"; }
-        }
         WebView webview = new WebView(getApplicationContext());
         webview.getSettings().setJavaScriptEnabled(true);
         webview.evaluateJavascript("(function() { return "+input+"; })();", new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String result) {
+                if(result.compareTo("null")==0) result=getString(R.string.error);
                 refresh(result);
             }
         });
@@ -58,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             default:{
+                if(input=="" && show2.getText().toString().compareTo("")!=0)
+                    show2.setText(show.getText());
                 input += ((Button)v).getText().toString();
                 show.setText(input);
                 break;

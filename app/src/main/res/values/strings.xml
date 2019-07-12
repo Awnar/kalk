@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">kalk+</string>
+    <string name="error">Coś poszło nie tak</string>
 </resources>
