@@ -4,13 +4,13 @@ import java.math.*;
 import java.util.*;
 
 class RPN {
-    private static Map<String,Integer> precedence_tab = new HashMap<String,Integer>(){{
-        put("%",7);
-        put("^",6);
-        put("*",5);
-        put("/",4);
-        put("+",2);
-        put("-",1);
+    private static Map<String, Integer> precedence_tab = new HashMap<String, Integer>() {{
+        put("%", 7);
+        put("^", 6);
+        put("*", 5);
+        put("/", 4);
+        put("+", 2);
+        put("-", 1);
     }};
 
     private static boolean isHigerPrec(String op, String sub) {
@@ -54,50 +54,52 @@ class RPN {
                         if (list.isEmpty())
                             list.add(token);
                         else
-                            list.add(i-2, token);
+                            list.add(i - 2, token);
                     } catch (Exception e) {
                         return e.getMessage();
                     }
                 }
             }
         }
+        if(list.getFirst().equals("e")) return Double.toString(Math.E);
         return list.getFirst();
     }
 
-    private static String calc(String op, String L1, String L2){
-        MathContext mc = new MathContext(15, RoundingMode.HALF_UP);
+    private static String calc(String op, String L1, String L2) {
+        MathContext mc = new MathContext(19, RoundingMode.HALF_UP);
         BigDecimal big;
         if (L1.equals("e")) big = new BigDecimal(Math.E);
         else big = new BigDecimal(L1);
         BigDecimal big2;
         if (L2.equals("e")) big2 = new BigDecimal(Math.E);
         else big2 = new BigDecimal(L2);
-        switch (op){
-            case "+":{
+        switch (op) {
+            case "+": {
                 big = big.add(big2, mc);
                 break;
             }
-            case "-":{
+            case "-": {
                 big = big.subtract(big2, mc);
                 break;
             }
-            case "*":{
+            case "*": {
                 big = big.multiply(big2, mc);
                 break;
             }
-            case "/":{
+            case "/": {
                 big = big.divide(big2, mc);
                 break;
             }
-            case "^":{
-                big = big.pow(new Integer(L2), mc);
+            case "^": {
+                big = new BigDecimal(Math.pow(big.doubleValue(), big2.doubleValue())).round(mc);
+                //big = big.pow(new Integer(L2), mc);
                 break;
             }
-            case "%":{
+            case "%": {
                 big = big.remainder(big2, mc);
                 break;
             }
         }
-        return  big.toString();
+        return big.toString();
     }
 }

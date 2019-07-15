@@ -12,8 +12,8 @@ import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView show,show2;
-    private String input="";
+    private TextView show, show2;
+    private String input = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,34 +55,40 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
     private void calculate() {
+        if (input.charAt(0) > 57 || input.charAt(0) < 48)//if first char is between 0 ans 9 (ASCII code)
+            input = show2.getText() + input;
+
         String parse = input.toLowerCase();
-//        for (String value : precedence_tab.keySet())
-//            parse = parse.replaceAll("[" + value + "]+", " " + value + " ");
-        //parse = parse.replaceAll("[\\^-+^(\][-]", "? -  ");
-        String[] operators = {"\\^", "-", "+", "*", "/", "(", ")"};
+        String[] operators = {"\\^", "-", "+", "*", "/"};
         for (String tmp : operators)
-            parse = parse.replaceAll('[' +tmp+ ']', " "+tmp+" ");
+            parse = parse.replaceAll("[" + tmp + "]+", " " + tmp + " ");
+        parse = parse.replaceAll("[(]", " ( ");
+        parse = parse.replaceAll("[)]", " ) ");
         parse = parse.replaceAll("mod", " % ");
         parse = parse.replaceAll("(\\W\\s- )", " -");
         if (parse.startsWith(" - ")) parse = parse.replaceFirst(" - ", "-");
         parse = parse.replaceAll(" [ ]+", " ");
         parse = parse.trim();
 
-        //refresh(Arrays.toString(RPN.toRPN(parse)));
+//        int open = StringUtils.countMatches;
+//        int close = StringUtils.countMatches;
+//        for (int i=open;i<=close;i++)
+//            parse+=" )";
+
         refresh(RPN.calculate(RPN.toRPN(parse)));
     }
 
-    private void refresh(String result){
+    private void refresh(String result) {
         show2.setText(input);
         show.setText(result);
-        input="";
+        input = "";
     }
 
-    public void onClick(View v){
+    public void onClick(View v) {
         if (!show2.getText().toString().isEmpty() && input.isEmpty())
             show2.setText(show.getText());
-        if (show.getText().toString().compareTo("0")==0)
-            input="";
+        if (show.getText().toString().compareTo("0") == 0)
+            input = "";
         int id = v.getId();
         switch (id) {
             case R.id.button15: { //=
@@ -94,12 +100,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.button19: {//SPEC
-                if (((Button)v).getText().toString().compareTo("SPEC")==0){
-                    ((Button)v).setText("NORM");
+                if (((Button) v).getText().toString().compareTo("SPEC") == 0) {
+                    ((Button) v).setText("NORM");
                     findViewById(R.id.button18).setVisibility(View.VISIBLE);
                     findViewById(R.id.RowX).setVisibility(View.VISIBLE);
                 } else {
-                    ((Button)v).setText("SPEC");
+                    ((Button) v).setText("SPEC");
                     findViewById(R.id.button18).setVisibility(View.INVISIBLE);
                     findViewById(R.id.RowX).setVisibility(View.INVISIBLE);
                 }
@@ -110,17 +116,12 @@ public class MainActivity extends AppCompatActivity {
                     if (input.endsWith("d")) input = input.substring(0, input.length() - 3);
                     else input = input.substring(0, input.length() - 1);
                 }
-                if (input.isEmpty()) input="0";
+                if (input.isEmpty()) input = "0";
                 show.setText(input);
                 break;
             }
-//            case R.id.button22: {//log
-//                input += "Log(";
-//                show.setText(input);
-//                break;
-//            }
-            default:{
-                input += ((Button)v).getText().toString();
+            default: {
+                input += ((Button) v).getText().toString();
                 show.setText(input);
                 break;
             }
