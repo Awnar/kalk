@@ -1,6 +1,8 @@
 package com.example.kalk;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
 import android.os.Bundle;
 import android.widget.*;
 import android.view.View;
@@ -27,16 +29,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void calculate() {
+        input = input.replaceAll("[+]+","+");
+        input = input.replaceAll("[-]+","-");
+        input = input.replaceAll("[*]+","*");
+        input = input.replaceAll("[/]+","/");
+        input = input.replaceAll("[.]+",".");
+
         String tmp = input.toUpperCase().replaceAll("MOD","%");
         tmp = tmp.replaceAll("E","Math.E");
         tmp = tmp.replaceAll("LOG","Math.log");
 
+        if(tmp.charAt(0)>57 || tmp.charAt(0)<48)//if first char is between 0 ans 9 (ASCII code)
+            tmp = show2.getText()+tmp;
+
         WebView webview = new WebView(getApplicationContext());
         webview.getSettings().setJavaScriptEnabled(true);
-        webview.evaluateJavascript("(function() { return "+tmp+"; })();", new ValueCallback<String>() {
+        webview.evaluateJavascript("(function() { return "+tmp+"; })();",new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String result) {
-                if(result.compareTo("null")==0) result=getString(R.string.error);
+                if(result.compareTo("null")==0) result = getString(R.string.error);
                 refresh(result);
             }
         });
