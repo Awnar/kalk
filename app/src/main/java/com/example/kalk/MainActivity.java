@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView show, show2;
     private String input = "";
     private int Lbracket = 0, Rbracket = 0;
-    private boolean dot = true, operator = false;
+    private boolean dot = true, operator = false, minus = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,9 @@ public class MainActivity extends AppCompatActivity {
         show.setText("0");
         show2.setText("");
         Lbracket = Rbracket = 0;
-        dot = operator = true;
+        dot = true;
+        operator = false;
+        minus = true;
     }
 
     private void calculate() {
@@ -39,12 +41,12 @@ public class MainActivity extends AppCompatActivity {
             //wstaw liczbę z poprzedniego wyniku na początek
             input = show2.getText() + input;
 
-        input = input.toLowerCase().replaceAll("mod", " % ");
+        input = input.toLowerCase().replaceAll("mod", "%");
         String result;
         try {
             result = RPN.calculate(RPN.toRPN(input));
         } catch (Exception e) {
-            Log.e("NumberFormatException", e.getMessage());
+            //Log.e("NumberFormatException", e.getMessage());
             result = "E ERROR";
         }
 
@@ -69,6 +71,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         refresh(result);
+        Lbracket = Rbracket = 0;
+        dot = true;
+        operator = true;
+        minus = true;
     }
 
     private void refresh(String result) {
@@ -119,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (input.length() > 2) {
                     char a = input.charAt(input.length() - 2);
-                    if (a >= '0' && a <= '9' || a==')')
+                    if (a >= '0' && a <= '9' || a == ')')
                         input = input.trim();
                 }
                 if (input.isEmpty()) {
@@ -166,32 +172,37 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                     case "-": {
-                        if (operator) {
+                        if (minus) {
                             operator = false;
                             dot = true;
+                            minus = false;
                             if (input.isEmpty()) {
-                                if (show2.getText().length() == 0)
+                                if (show2.getText().length() == 0) {
                                     input += "-";
-                                else
+                                    minus = true;
+                                } else
                                     input += " - ";
                             } else if (input.charAt(input.length() - 1) > '0'
                                     && input.charAt(input.length() - 1) < '9'
                                     || input.charAt(input.length() - 1) == ')'
                                     || input.charAt(input.length() - 1) == 'E')
                                 input += " - ";
-                            else
+                            else {
                                 input += " -";
+                                minus = true;
+                            }
                         }
                         break;
                     }
                     case "E": {
-                        if (!input.isEmpty())
+                        if (!input.isEmpty()) {
                             if (input.charAt(input.length() - 1) > '0'
                                     && input.charAt(input.length() - 1) < '9'
                                     || input.charAt(input.length() - 1) == '.'
                                     || input.charAt(input.length() - 1) == 'E')
                                 return;
-                        if (input.charAt(input.length() - 1) == ')') return;
+                            if (input.charAt(input.length() - 1) == ')') return;
+                        }
                         if (input.compareTo("0") == 0) input = key;
                         else input += key;
                         operator = true;
@@ -199,13 +210,19 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                     default: {
-                        if (input.charAt(input.length() - 1) == ')') return;
+                        if (!input.isEmpty())
+                            if (input.charAt(input.length() - 1) == ')'
+                                    || input.charAt(input.length() - 1) == 'E')
+                                return;
                         if (input.compareTo("0") == 0) input = key;
                         else input += key;
                         operator = true;
                     }
                 }
-                show.setText(input);
+                if (input.isEmpty())
+                    show.setText("0");
+                else
+                    show.setText(input);
             }
         }
     }

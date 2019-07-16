@@ -3,7 +3,6 @@ package com.example.kalk;
 import java.math.*;
 import java.lang.String;
 import java.util.*;
-import android.content.Context;
 import android.util.Log;
 
 class RPN {
@@ -66,15 +65,15 @@ class RPN {
                     } catch (NumberFormatException e) {
                         //nie wiem jak uzyskać dostęp do zasobów getString(R.string....
                         //więc robię jakieś obejście, choć można by i statycznie wpisać wartości
-                        Log.e("NumberFormatException", e.getMessage());
+                            Log.e("NumberFormatException", e.getMessage());
                         if (e.getMessage().equals("Infinity"))
                             return "E OVERFLOW";
                         return "E NumberFormatException";
                     } catch (ArithmeticException e) {
-                        Log.e("ArithmeticException", e.getMessage());
+                            Log.e("ArithmeticException", e.getMessage());
                         return "E ArithmeticException";
                     } catch (Exception e) {
-                        Log.e("ERROR", e.getMessage());
+                            Log.e("ERROR", e.getMessage());
                         return "E ERROR";
                     }
                 }
