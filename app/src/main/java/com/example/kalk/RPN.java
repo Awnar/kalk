@@ -7,6 +7,7 @@ import android.content.Context;
 import android.util.Log;
 
 class RPN {
+    //tablica z priorytetami operatorów
     private static Map<String, Integer> precedence_tab = new HashMap<String, Integer>() {{
         put("%", 7);
         put("^", 6);
@@ -16,13 +17,15 @@ class RPN {
         put("-", 1);
     }};
 
+    //porównywanie operatorów
     private static boolean isHigerPrec(String op, String sub) {
         return (precedence_tab.containsKey(sub) && precedence_tab.get(sub) >= precedence_tab.get(op));
     }
 
+    //konwersja na postać RPN
     public static String[] toRPN(String in) {
-        LinkedList<String> output = new LinkedList<>();
-        LinkedList<String> stack = new LinkedList<>();
+        LinkedList<String> output = new LinkedList<>();//stos wyjściowy
+        LinkedList<String> stack = new LinkedList<>();//stos tymczasowy dla operatorów
         for (String token : in.split(" ")) {
             if (precedence_tab.containsKey(token)) {
                 while (!stack.isEmpty() && isHigerPrec(token, stack.peek()))
@@ -43,6 +46,7 @@ class RPN {
         return output.toArray(new String[output.size()]);
     }
 
+    //obliczenia na podstawie tablicy z RPN
     public static String calculate(String[] in) {
         LinkedList<String> list = new LinkedList<String>(Arrays.asList(in));
         while (list.size() > 2) {
@@ -62,30 +66,33 @@ class RPN {
                     } catch (NumberFormatException e) {
                         //nie wiem jak uzyskać dostęp do zasobów getString(R.string....
                         //więc robię jakieś obejście, choć można by i statycznie wpisać wartości
-                        Log.e("NumberFormatException",e.getMessage());
-                        return  "E NumberFormatException";
+                        Log.e("NumberFormatException", e.getMessage());
+                        return "E NumberFormatException";
                     } catch (ArithmeticException e) {
-                        Log.e("ArithmeticException",e.getMessage());
-                        return  "E ArithmeticException";
+                        Log.e("ArithmeticException", e.getMessage());
+                        return "E ArithmeticException";
                     } catch (Exception e) {
-                        Log.e("ERROR",e.getMessage());
+                        Log.e("ERROR", e.getMessage());
                         return "E ERROR"; //e.getMessage();
                     }
                 }
             }
         }
-        if(list.getFirst().equals("e")) return Double.toString(Math.E);
+        if (list.getFirst().equals("e")) return Double.toString(Math.E);
         return list.getFirst();
     }
 
+    //obliczenia na liczbach
     private static String calc(String op, String L1, String L2) {
         MathContext mc = new MathContext(19, RoundingMode.HALF_UP);
-        BigDecimal big;
+        BigDecimal big, big2;
+
         if (L1.equals("e")) big = new BigDecimal(Math.E);
         else big = new BigDecimal(L1);
-        BigDecimal big2;
+
         if (L2.equals("e")) big2 = new BigDecimal(Math.E);
         else big2 = new BigDecimal(L2);
+
         switch (op) {
             case "+": {
                 big = big.add(big2, mc);
@@ -104,6 +111,7 @@ class RPN {
                 break;
             }
             case "^": {
+                //BigDecimal nie można podnieść do potęgi zmiennoprzecinkowej
                 big = new BigDecimal(Math.pow(big.doubleValue(), big2.doubleValue())).round(mc);
                 //big = big.pow(new Integer(L2), mc);
                 break;

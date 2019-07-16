@@ -54,8 +54,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void calculate() {
         if (input.charAt(0) > 57 || input.charAt(0) < 48)//if first char is between 0 ans 9 (ASCII code)
+            //jeśli pierwszym znakiem jest operator wstaw liczbę z poprzedniego wyniku na początek
             input = show2.getText() + input;
 
+        //prasowanie do formy przyjmowanej przez klasę RPN tzn wstawianie spacji jako rozdzielacz
+        //dla tokenów i usuwanie ewentualnych zdublowanych operatorów
         String parse = input.toLowerCase();
         String[] operators = {"\\^", "-", "+", "*", "/"};
         for (String tmp : operators)
@@ -69,17 +72,19 @@ public class MainActivity extends AppCompatActivity {
         parse = parse.trim();
 
         String result = RPN.calculate(RPN.toRPN(parse));
+        //w klasie RPN nie mogłem uzyskać dostępu do zasobów więc mamy obejście
+        //można by tu ustawić try{}catch(){} ale chciałem by obsługa błędów była tam
         if (result.startsWith("E"))
             switch (result) {
-                case "E NumberFormatException":{
+                case "E NumberFormatException": {
                     result = getString(R.string.NumberFormatException);
                     break;
                 }
-                case "E ArithmeticException":{
+                case "E ArithmeticException": {
                     result = getString(R.string.ArithmeticException);
                     break;
                 }
-                case "E ERROR":{
+                case "E ERROR": {
                     result = getString(R.string.error);
                 }
             }
