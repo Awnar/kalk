@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (input.length() > 2) {
                     char a = input.charAt(input.length() - 2);
-                    if (a >= '0' && a <= '9')
+                    if (a >= '0' && a <= '9' || a==')')
                         input = input.trim();
                 }
                 if (input.isEmpty()) {
@@ -191,9 +191,15 @@ public class MainActivity extends AppCompatActivity {
                                     || input.charAt(input.length() - 1) == '.'
                                     || input.charAt(input.length() - 1) == 'E')
                                 return;
+                        if (input.charAt(input.length() - 1) == ')') return;
+                        if (input.compareTo("0") == 0) input = key;
+                        else input += key;
+                        operator = true;
                         dot = false;
+                        break;
                     }
                     default: {
+                        if (input.charAt(input.length() - 1) == ')') return;
                         if (input.compareTo("0") == 0) input = key;
                         else input += key;
                         operator = true;
