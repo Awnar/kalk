@@ -3,6 +3,7 @@ package com.example.kalk;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.*;
 import android.view.View;
 import android.webkit.*;
@@ -12,6 +13,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView show, show2;
     private String input = "";
+    private int Lbracket = 0, Rbracket = 0;
+    private boolean dot = true, operator = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,53 +28,27 @@ public class MainActivity extends AppCompatActivity {
         input = "";
         show.setText("0");
         show2.setText("");
+        Lbracket = Rbracket = 0;
+        dot = operator = true;
     }
 
-//    private void calculate() {
-//        input = input.replaceAll("[+]+","+");
-//        input = input.replaceAll("[-]+","-");
-//        input = input.replaceAll("[*]+","*");
-//        input = input.replaceAll("[/]+","/");
-//        input = input.replaceAll("[.]+",".");
-//
-//        String tmp = input.toUpperCase().replaceAll("MOD","%");
-//        tmp = tmp.replaceAll("E","Math.E");
-//        tmp = tmp.replaceAll("LOG","Math.log");
-//
-//        if (tmp.charAt(0)>57 || tmp.charAt(0)<48)//if first char is between 0 ans 9 (ASCII code)
-//            tmp = show2.getText()+tmp;
-//
-//        WebView webview = new WebView(getApplicationContext());
-//        webview.getSettings().setJavaScriptEnabled(true);
-//        webview.evaluateJavascript("(function() { return "+tmp+"; })();",new ValueCallback<String>() {
-//            @Override
-//            public void onReceiveValue(String result) {
-//                if (result.compareTo("null")==0) result = getString(R.string.error);
-//                refresh(result);
-//            }
-//        });
-//    }
-
     private void calculate() {
-        if (input.charAt(0) > 57 || input.charAt(0) < 48)//if first char is between 0 ans 9 (ASCII code)
-            //jeśli pierwszym znakiem jest operator wstaw liczbę z poprzedniego wyniku na początek
+        if (input.isEmpty()) return;
+
+        if (!((input.charAt(0) >= '0' && input.charAt(0) <= '9') || input.charAt(0) == '.' || input.charAt(0) == '('))
+            //jeśli pierwszym znakiem jest operator (nie liczba i nie kropka lub nawias)
+            //wstaw liczbę z poprzedniego wyniku na początek
             input = show2.getText() + input;
 
-        //prasowanie do formy przyjmowanej przez klasę RPN tzn wstawianie spacji jako rozdzielacz
-        //dla tokenów i usuwanie ewentualnych zdublowanych operatorów
-        String parse = input.toLowerCase();
-        String[] operators = {"\\^", "-", "+", "*", "/"};
-        for (String tmp : operators)
-            parse = parse.replaceAll("[" + tmp + "]+", " " + tmp + " ");
-        parse = parse.replaceAll("[(]", " ( ");
-        parse = parse.replaceAll("[)]", " ) ");
-        parse = parse.replaceAll("mod", " % ");
-        parse = parse.replaceAll("(\\W\\s- )", " -");
-        if (parse.startsWith(" - ")) parse = parse.replaceFirst(" - ", "-");
-        parse = parse.replaceAll(" [ ]+", " ");
-        parse = parse.trim();
+        input = input.toLowerCase().replaceAll("mod", " % ");
+        String result
+        try {
+            result = RPN.calculate(RPN.toRPN(input));
+        } catch (Exception e) {
+            Log.e("NumberFormatException", e.getMessage());
+            result = "E ERROR";
+        }
 
-        String result = RPN.calculate(RPN.toRPN(parse));
         //w klasie RPN nie mogłem uzyskać dostępu do zasobów więc mamy obejście
         //można by tu ustawić try{}catch(){} ale chciałem by obsługa błędów była tam
         if (result.startsWith("E"))
@@ -82,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 case "E ArithmeticException": {
                     result = getString(R.string.ArithmeticException);
+                    break;
+                }
+                case "E OVERFLOW": {
+                    result = getString(R.string.OVERFLOW);
                     break;
                 }
                 case "E ERROR": {
@@ -98,10 +79,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClick(View v) {
+        input = input.replaceFirst(" [ ]+", " ");
         if (!show2.getText().toString().isEmpty() && input.isEmpty())
             show2.setText(show.getText());
-        if (show.getText().toString().compareTo("0") == 0)
-            input = "";
         int id = v.getId();
         switch (id) {
             case R.id.button15: { //=
@@ -125,16 +105,101 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.button17: {//backspace
+                input = input.trim();
                 if (!input.isEmpty()) {
-                    if (input.endsWith("d")) input = input.substring(0, input.length() - 3);
-                    else input = input.substring(0, input.length() - 1);
+                    if (input.endsWith(".")) dot = true;
+                    else if (RPN.precedence_tab.containsKey(Character.toString(input.charAt(input.length() - 1))))
+                        operator = true;
+                    else if (input.endsWith("(")) Lbracket--;
+                    else if (input.endsWith(")")) Rbracket--;
+
+                    if (input.endsWith("d")) {
+                        input = input.substring(0, input.length() - 3);
+                        operator = true;
+                    } else input = input.substring(0, input.length() - 1);
                 }
-                if (input.isEmpty()) input = "0";
+                if (input.length() > 2) {
+                    char a = input.charAt(input.length() - 2);
+                    if (a >= '0' && a <= '9')
+                        input = input.trim();
+                }
+                if (input.isEmpty()) {
+                    input = "";
+                    clear();
+                }
                 show.setText(input);
                 break;
             }
             default: {
-                input += ((Button) v).getText().toString();
+                String key = ((Button) v).getText().toString();
+                switch (key) {
+                    case "(": {
+                        Lbracket++;
+                        input += "( ";
+                        break;
+                    }
+                    case ")": {
+                        if (Lbracket > Rbracket) {
+                            Rbracket++;
+                            input += " )";
+                        }
+                        break;
+                    }
+                    case ".": {
+                        if (dot) {
+                            operator = true;
+                            dot = false;
+                            input += ".";
+                        }
+                        break;
+                    }
+                    case "mod":
+                    case "^":
+                    case "%":
+                    case "*":
+                    case "/":
+                    case "+": {
+                        if (operator) {
+                            input += " " + key + " ";
+                            dot = true;
+                            operator = false;
+                        }
+                        break;
+                    }
+                    case "-": {
+                        if (operator) {
+                            operator = false;
+                            dot = true;
+                            if (input.isEmpty()) {
+                                if (show2.getText().length() == 0)
+                                    input += "-";
+                                else
+                                    input += " - ";
+                            } else if (input.charAt(input.length() - 1) > '0'
+                                    && input.charAt(input.length() - 1) < '9'
+                                    || input.charAt(input.length() - 1) == ')'
+                                    || input.charAt(input.length() - 1) == 'E')
+                                input += " - ";
+                            else
+                                input += " -";
+                        }
+                        break;
+                    }
+                    case "E": {
+                        if (!input.isEmpty())
+                            if (input.charAt(input.length() - 1) > '0'
+                                    && input.charAt(input.length() - 1) < '9'
+                                    || input.charAt(input.length() - 1) == '.'
+                                    || input.charAt(input.length() - 1) == 'E')
+                                return;
+                        dot = false;
+                    }
+                    default: {
+                        if (input.compareTo("0") == 0) input = key;
+                        else input += key;
+                        operator = true;
+                    }
+                }
                 show.setText(input);
             }
         }

@@ -8,7 +8,7 @@ import android.util.Log;
 
 class RPN {
     //tablica z priorytetami operatorów
-    private static Map<String, Integer> precedence_tab = new HashMap<String, Integer>() {{
+    public static Map<String, Integer> precedence_tab = new HashMap<String, Integer>() {{
         put("%", 7);
         put("^", 6);
         put("*", 5);
@@ -67,13 +67,15 @@ class RPN {
                         //nie wiem jak uzyskać dostęp do zasobów getString(R.string....
                         //więc robię jakieś obejście, choć można by i statycznie wpisać wartości
                         Log.e("NumberFormatException", e.getMessage());
+                        if (e.getMessage().equals("Infinity"))
+                            return "E OVERFLOW";
                         return "E NumberFormatException";
                     } catch (ArithmeticException e) {
                         Log.e("ArithmeticException", e.getMessage());
                         return "E ArithmeticException";
                     } catch (Exception e) {
                         Log.e("ERROR", e.getMessage());
-                        return "E ERROR"; //e.getMessage();
+                        return "E ERROR";
                     }
                 }
             }
@@ -84,7 +86,7 @@ class RPN {
 
     //obliczenia na liczbach
     private static String calc(String op, String L1, String L2) {
-        MathContext mc = new MathContext(19, RoundingMode.HALF_UP);
+        MathContext mc = new MathContext(18, RoundingMode.HALF_UP);
         BigDecimal big, big2;
 
         if (L1.equals("e")) big = new BigDecimal(Math.E);
