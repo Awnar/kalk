@@ -2,13 +2,11 @@ package com.example.kalk;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.widget.*;
 import android.view.View;
 import android.webkit.*;
 import java.lang.String;
-import java.util.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -70,12 +68,22 @@ public class MainActivity extends AppCompatActivity {
         parse = parse.replaceAll(" [ ]+", " ");
         parse = parse.trim();
 
-//        int open = StringUtils.countMatches;
-//        int close = StringUtils.countMatches;
-//        for (int i=open;i<=close;i++)
-//            parse+=" )";
-
-        refresh(RPN.calculate(RPN.toRPN(parse)));
+        String result = RPN.calculate(RPN.toRPN(parse));
+        if (result.startsWith("E"))
+            switch (result) {
+                case "E NumberFormatException":{
+                    result = getString(R.string.NumberFormatException);
+                    break;
+                }
+                case "E ArithmeticException":{
+                    result = getString(R.string.ArithmeticException);
+                    break;
+                }
+                case "E ERROR":{
+                    result = getString(R.string.error);
+                }
+            }
+        refresh(result);
     }
 
     private void refresh(String result) {
@@ -123,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
             default: {
                 input += ((Button) v).getText().toString();
                 show.setText(input);
-                break;
             }
         }
     }

@@ -1,7 +1,10 @@
 package com.example.kalk;
 
 import java.math.*;
+import java.lang.String;
 import java.util.*;
+import android.content.Context;
+import android.util.Log;
 
 class RPN {
     private static Map<String, Integer> precedence_tab = new HashMap<String, Integer>() {{
@@ -42,7 +45,7 @@ class RPN {
 
     public static String calculate(String[] in) {
         LinkedList<String> list = new LinkedList<String>(Arrays.asList(in));
-        while (list.size() > 1) {
+        while (list.size() > 2) {
             for (int i = 2; i < list.size(); i++) {
                 String token = list.get(i);
                 if (precedence_tab.containsKey(token)) {
@@ -55,8 +58,18 @@ class RPN {
                             list.add(token);
                         else
                             list.add(i - 2, token);
+
+                    } catch (NumberFormatException e) {
+                        //nie wiem jak uzyskać dostęp do zasobów getString(R.string....
+                        //więc robię jakieś obejście, choć można by i statycznie wpisać wartości
+                        Log.e("NumberFormatException",e.getMessage());
+                        return  "E NumberFormatException";
+                    } catch (ArithmeticException e) {
+                        Log.e("ArithmeticException",e.getMessage());
+                        return  "E ArithmeticException";
                     } catch (Exception e) {
-                        return e.getMessage();
+                        Log.e("ERROR",e.getMessage());
+                        return "E ERROR"; //e.getMessage();
                     }
                 }
             }
