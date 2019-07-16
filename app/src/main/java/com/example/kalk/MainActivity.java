@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.*;
 import android.view.View;
-import android.webkit.*;
 import java.lang.String;
 
 public class MainActivity extends AppCompatActivity {
@@ -41,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             input = show2.getText() + input;
 
         input = input.toLowerCase().replaceAll("mod", " % ");
-        String result
+        String result;
         try {
             result = RPN.calculate(RPN.toRPN(input));
         } catch (Exception e) {
