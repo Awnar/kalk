@@ -28,16 +28,15 @@ public class MainActivity extends AppCompatActivity {
         show.setText("0");
         show2.setText("");
         Lbracket = Rbracket = 0;
-        dot = true;
+        dot = minus = true;
         operator = false;
-        minus = true;
     }
 
     private void calculate() {
         if (input.isEmpty()) return;
 
         if (!((input.charAt(0) >= '0' && input.charAt(0) <= '9') || input.charAt(0) == '.' || input.charAt(0) == '('))
-            //jeśli pierwszym znakiem jest operator (nie liczba i nie kropka lub nawias)
+            //jeśli pierwszym znakiem jest operator (nie liczba i nie kropka i nie nawias)
             //wstaw liczbę z poprzedniego wyniku na początek
             input = show2.getText() + input;
 
@@ -72,9 +71,7 @@ public class MainActivity extends AppCompatActivity {
             }
         refresh(result);
         Lbracket = Rbracket = 0;
-        dot = true;
-        operator = true;
-        minus = true;
+        dot = operator = minus = true;
     }
 
     private void refresh(String result) {
@@ -85,8 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClick(View v) {
         input = input.replaceFirst(" [ ]+", " ");
-        if (!show2.getText().toString().isEmpty() && input.isEmpty())
-            show2.setText(show.getText());
+
         int id = v.getId();
         switch (id) {
             case R.id.button15: { //=
@@ -110,8 +106,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.button17: {//backspace
-                input = input.trim();
                 if (!input.isEmpty()) {
+                    input = input.trim();
                     if (input.endsWith(".")) dot = true;
                     else if (RPN.precedence_tab.containsKey(Character.toString(input.charAt(input.length() - 1))))
                         operator = true;
@@ -128,11 +124,8 @@ public class MainActivity extends AppCompatActivity {
                     if (a >= '0' && a <= '9' || a == ')')
                         input = input.trim();
                 }
-                if (input.isEmpty()) {
-                    input = "";
+                if (input.isEmpty())
                     clear();
-                }
-                show.setText(input);
                 break;
             }
             default: {
