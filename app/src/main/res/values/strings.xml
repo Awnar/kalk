@@ -1,4 +1,7 @@
 <resources>
-    <string name="app_name">kalk+</string>
+    <string name="app_name">RPN calculator</string>
     <string name="error">Coś poszło nie tak</string>
+    <string name="NumberFormatException">Zły format danych</string>
+    <string name="ArithmeticException">Nie można tego obliczyć</string>
+    <string name="OVERFLOW">Przekroczony zakres zmiennych</string>
 </resources>
