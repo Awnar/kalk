@@ -3,7 +3,6 @@ package com.example.kalk;
 import java.math.*;
 import java.lang.String;
 import java.util.*;
-import android.util.Log;
 
 class RPN {
     //tablica z priorytetami operatorów
@@ -12,8 +11,8 @@ class RPN {
         put("^", 6);
         put("*", 5);
         put("/", 4);
-        put("+", 2);
-        put("-", 1);
+        put("-", 2);
+        put("+", 1);
     }};
 
     //porównywanie operatorów
@@ -52,29 +51,15 @@ class RPN {
             for (int i = 2; i < list.size(); i++) {
                 String token = list.get(i);
                 if (precedence_tab.containsKey(token)) {
-                    try {
-                        token = calc(token, list.get(i - 2), list.get(i - 1));
-                        list.remove(i);
-                        list.remove(i - 1);
-                        list.remove(i - 2);
-                        if (list.isEmpty())
-                            list.add(token);
-                        else
-                            list.add(i - 2, token);
-
-                    } catch (NumberFormatException e) {
-                        //nie wiem jak uzyskać dostęp do zasobów getString(R.string....
-                        //więc robię jakieś obejście, choć można by i statycznie wpisać wartości
-                            Log.e("NumberFormatException", e.getMessage());
-                        if (e.getMessage().equals("Infinity"))
-                            return "E OVERFLOW";
-                        return "E NumberFormatException";
-                    } catch (ArithmeticException e) {
-                            Log.e("ArithmeticException", e.getMessage());
-                        return "E ArithmeticException";
-                    } catch (Exception e) {
-                            Log.e("ERROR", e.getMessage());
-                        return "E ERROR";
+                    token = calc(token, list.get(i - 2), list.get(i - 1));
+                    list.remove(i);
+                    list.remove(i - 1);
+                    list.remove(i - 2);
+                    if (list.isEmpty())
+                        list.add(token);
+                    else {
+                        list.add(i - 2, token);
+                        break;
                     }
                 }
             }

@@ -3,10 +3,11 @@ package com.example.kalk;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.*;
 import android.view.View;
 import java.lang.String;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,41 +36,44 @@ public class MainActivity extends AppCompatActivity {
     private void calculate() {
         if (input.isEmpty()) return;
 
-        if (!((input.charAt(0) >= '0' && input.charAt(0) <= '9') || input.charAt(0) == '.' || input.charAt(0) == '('))
-            //jeśli pierwszym znakiem jest operator (nie liczba i nie kropka i nie nawias)
+        if (!((input.charAt(0) >= '0' && input.charAt(0) <= '9') || input.charAt(0) == '.'
+                || input.charAt(0) == '(' || input.charAt(0) == 'E'))
+            //jeśli pierwszym znakiem jest operator (nie liczba i nie kropka i nie nawias i nie E)
             //wstaw liczbę z poprzedniego wyniku na początek
-            input = show2.getText() + input;
-
+            input = show2.getText() + " " + input;
+        input = input.replaceFirst(" [ ]+", " ");
         input = input.toLowerCase().replaceAll("mod", "%");
+
+        //łatanie problemów w formatowaniu wykrytych przy testach
+        input = input.toLowerCase().replaceAll("-\\(", "- (");
+        Matcher matcher = Pattern.compile("(\\)|\\d)(\\s)*\\(").matcher(input);
+        while (matcher.find())
+            input = input.replace(matcher.group(1) + "(", matcher.group(1) + " * (");
+        matcher = Pattern.compile("(^\\)\\w) - (\\d)").matcher(input);
+        while (matcher.find())
+            input = input.replace(matcher.group(1) + " - " + matcher.group(2),
+                    matcher.group(1) + " -" + matcher.group(2));
+
         String result;
         try {
             result = RPN.calculate(RPN.toRPN(input));
+        } catch (NumberFormatException e) {
+            if (e.getMessage().contains("Infinity"))
+                result = getString(R.string.OVERFLOW);
+            else
+                result = getString(R.string.NumberFormatException);
+        } catch (ArithmeticException e) {
+            result = getString(R.string.ArithmeticException);
         } catch (Exception e) {
-            //Log.e("NumberFormatException", e.getMessage());
-            result = "E ERROR";
+            result = getString(R.string.error);
         }
 
-        //w klasie RPN nie mogłem uzyskać dostępu do zasobów więc mamy obejście
-        //można by tu ustawić try{}catch(){} ale chciałem by obsługa błędów była tam
-        if (result.startsWith("E"))
-            switch (result) {
-                case "E NumberFormatException": {
-                    result = getString(R.string.NumberFormatException);
-                    break;
-                }
-                case "E ArithmeticException": {
-                    result = getString(R.string.ArithmeticException);
-                    break;
-                }
-                case "E OVERFLOW": {
-                    result = getString(R.string.OVERFLOW);
-                    break;
-                }
-                case "E ERROR": {
-                    result = getString(R.string.error);
-                }
-            }
+        //usuwanie nadmiarowych 0, pustych wyników itd.
+        while (result.endsWith("0") && result.contains(".")) result = result.substring(0, result.length() - 1);
+        if (result.startsWith("0E") || result.isEmpty()) result = "0";
+        if (result.endsWith(".")) result = result.substring(0, result.length() - 1);
         refresh(result);
+
         Lbracket = Rbracket = 0;
         dot = operator = minus = true;
     }
@@ -126,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (input.isEmpty())
                     clear();
+                else
+                    show.setText(input);
                 break;
             }
             default: {
@@ -209,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                         if (input.compareTo("0") == 0) input = key;
                         else input += key;
-                        operator = true;
+                        operator = minus = true;
                     }
                 }
                 if (input.isEmpty())
